@@ -3,9 +3,8 @@ import struct
 import time
 import math
 import logging
-import inspect
-import asyncio
 
+from .error_codes import ERROR_CODES
 
 class DalyBMS:
     def __init__(self, request_retries=3, address=4, logger=None):
@@ -188,7 +187,25 @@ class DalyBMS:
             return False
         # todo: implement
         self.logger.debug(response_data.hex())
-        return {"error": "not implemented"}
+
+        parts = struct.unpack('>b ? ? B l', response_data)
+
+        if parts[0] == 0:
+            mode = "stationary"
+        elif parts[0] == 1:
+            mode = "charging"
+        else:
+            mode = "discharging"
+
+        data = {
+            "mode": mode,
+            "charging_mosfet": parts[1],
+            "discharging_mosfet": parts[2],
+            # "bms_cycles": parts[3], unstable result
+            "capacity_ah": parts[4] / 1000,
+        }
+
+        return data
 
     def get_status(self, response_data=None):
         if not response_data:
@@ -196,7 +213,7 @@ class DalyBMS:
         if not response_data:
             return False
 
-        parts = struct.unpack('>b b b b b h x', response_data)
+        parts = struct.unpack('>b b ? ? b h x', response_data)
         state_bits = bin(parts[4])[2:]
         state_names = ["DI1", "DI2", "DI3", "DI4", "DO1", "DO2", "DO3", "DO4"]
         states = {}
@@ -208,9 +225,9 @@ class DalyBMS:
             state_index += 1
         data = {
             "cells": parts[0],  # number of cells
-            "temperature_sensors": parts[1] == 1,  # number of sensors
-            "charger_running": True if parts[2] == 1 else False,
-            "load_running": True if parts[3] == 1 else False,
+            "temperature_sensors": parts[1],  # number of sensors
+            "charger_running": parts[2],
+            "load_running": parts[3],
             # "state_bits": state_bits,
             "states": states,
             "cycles": parts[5],  # number of charge/discharge cycles
@@ -232,6 +249,20 @@ class DalyBMS:
             max_responses = math.ceil(self.status["cells"] / 3)
         return max_responses
 
+    def _split_frames(self, response_data, status_field, structure):
+        values = {}
+        x = 1
+        for response_bytes in response_data:
+            parts = struct.unpack(structure, response_bytes)
+            if parts[0] != x:
+                self.logger.warning("frame out of order, expected %i, got %i" % (x, response_bytes[0]))
+                continue
+            for value in parts[1:]:
+                values[len(values) + 1] = value
+                if len(values) == self.status[status_field]:
+                    return values
+            x += 1
+
     def get_cell_voltages(self, response_data=None):
         if not response_data:
             max_responses = self._calc_cell_voltage_responses()
@@ -240,22 +271,11 @@ class DalyBMS:
             response_data = self._read_request("95", max_responses=max_responses)
         if not response_data:
             return False
-        x = 1
-        cell_voltages = {}
-        for response_bytes in response_data:
-            parts = struct.unpack('>b h h h x', response_bytes)
-            if parts[0] != x:
-                self.logger.warning("frame out of order, expected %i, got %i" % (x, response_bytes[0]))
-                continue
-            for volt in parts[1:]:
-                if volt < 1000 or volt > 5000:
-                    self.logger.error("%iv of cell %i out of range" % (volt, x))
-                    break
-                else:
-                    cell_voltages[len(cell_voltages) + 1] = volt / 1000
-                    if len(cell_voltages) == self.status["cells"]:
-                        return cell_voltages
-            x += 1
+
+        cell_voltages = self._split_frames(response_data=response_data, status_field="cells", structure=">b 3h x")
+        for id in cell_voltages:
+            cell_voltages[id] = cell_voltages[id] / 1000
+        return cell_voltages
 
     def get_temperatures(self, response_data=None):
         # Sensor temperatures
@@ -263,9 +283,12 @@ class DalyBMS:
             response_data = self._read_request("96", max_responses=3)
         if not response_data:
             return False
-        # todo: implement
-        self.logger.debug(response_data)
-        return {"error": "not implemented"}
+
+        temperatures = self._split_frames(response_data=response_data, status_field="temperature_sensors",
+                                          structure=">b 7b")
+        for id in temperatures:
+            temperatures[id] = temperatures[id] - 40
+        return temperatures
 
     def get_balancing_status(self, response_data=None):
         # Cell balancing status
@@ -273,9 +296,14 @@ class DalyBMS:
             response_data = self._read_request("97")
         if not response_data:
             return False
-        # todo: implement
-        bits = bin(int(response_data.hex(), base=16))[2:]
-        self.logger.debug(bits)
+        self.logger.info(response_data.hex())
+        bits = bin(int(response_data.hex(), base=16))[2:].zfill(48)
+        self.logger.info(bits)
+        cells = {}
+        for cell in range(1, self.status["cells"] + 1):
+            cells[cell] = bool(int(bits[cell * -1]))
+        self.logger.info(cells)
+        # todo: get sample data and verify result
         return {"error": "not implemented"}
 
     def get_errors(self, response_data=None):
@@ -285,9 +313,23 @@ class DalyBMS:
         if int.from_bytes(response_data, byteorder='big') == 0:
             return []
 
-        # todo: implement
-        self.logger.debug(response_data.hex())
-        return {"error": "not implemented"}
+        byte_index = 0
+        errors = []
+        for b in response_data:
+            if b == 0:
+                byte_index += 1
+                continue
+            bits = bin(b)[2:]
+            bit_index = 0
+            for bit in reversed(bits):
+                if bit == "1":
+                    errors.append(ERROR_CODES[byte_index][bit_index])
+
+                bit_index += 1
+
+            self.logger.debug("%s %s %s" % (byte_index, b, bits))
+            byte_index += 1
+        return errors
 
     def get_all(self):
         return {
