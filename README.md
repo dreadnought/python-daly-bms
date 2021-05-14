@@ -1,14 +1,40 @@
-# python-daly-bms
-
 This is a Python module for reading data from Daly BMS devices. It supports serial as well as Bluetooth connections. Not all commands that the BMS supports are implemented yet, please take a look at the examples below to see if it serves your needs.
+
+## Installation
+
+### From PyPI
+
+```
+pip3 install dalybms
+```
+
+### From Git
+
+```
+git clone https://github.com/dreadnought/python-daly-bms.git
+cd python-daly-bms
+sudo python3 setup.py install
+```
+
+### Dependencies
+
+For *serial* connections:
+```
+pip3 install pyserial
+```
+
+For *bluetooth* connections:
+```
+pip3 install bleak
+```
 
 ## CLI
 
-`./daly-bms-cli.py` is a reference implementation for this module, but can also be used to test the connection or use it in combination with other programming languages. The data gets returned in JSON format. It doesn't support Bluetooth connections yet.
+`daly-bms-cli` is a reference implementation for this module, but can also be used to test the connection or use it in combination with other programming languages. The data gets returned in JSON format. It doesn't support Bluetooth connections yet.
 
 ### Usage
 ```
-# ./daly-bms-cli.py --help
+# daly-bms-cli --help
 usage: daly-bms-cli.py [-h] -d DEVICE [--status] [--soc] [--mosfet]
                        [--cell-voltages] [--temperatures] [--balancing]
                        [--errors] [--all] [--check] [--retry RETRY]
@@ -35,7 +61,7 @@ optional arguments:
 
 Get the State of Charge:
 ```
-# ./daly-bms-cli.py  -d /dev/ttyUSB0 --soc
+# daly-bms-cli  -d /dev/ttyUSB0 --soc
 {
   "total_voltage": 57.7,
   "current": -11.1,
@@ -45,7 +71,7 @@ Get the State of Charge:
 
 Get everything possible:
 ```
-# ./daly-bms-cli.py  -d /dev/ttyUSB0 --all
+# daly-bms-cli  -d /dev/ttyUSB0 --all
 {
   "soc": {
     "total_voltage": 52.5,
@@ -113,11 +139,7 @@ Get everything possible:
 
 ### Bluetooth
 
-- Of Bluetooth connections you need to have `bleak` installed. It's also recommended to have a recent BlueZ installed (>=5.53).
-
-  ```
-  pip3 install bleak
-  ```
+- It's also recommended to have a recent BlueZ installed (>=5.53).
 
   The Bluetooth connection uses `asyncio` for the connection, so the data is received asynchronous.  
 
