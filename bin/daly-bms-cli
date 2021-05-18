@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--device",
                     help="RS485 device, e.g. /dev/ttyUSB0",
                     type=str, required=True)
-
+parser.add_argument("--uart", help="UART instead of RS485", action="store_true")
 parser.add_argument("--status", help="show status", action="store_true")
 parser.add_argument("--soc", help="show voltage, current, SOC", action="store_true")
 parser.add_argument("--mosfet", help="show mosfet status", action="store_true")
@@ -36,7 +36,12 @@ logging.basicConfig(level=level, format=log_format, datefmt='%H:%M:%S')
 
 logger = logging.getLogger()
 
-bms = DalyBMS(request_retries=args.retry, logger=logger)
+if args.uart:
+    address = 8
+else:
+    address = 4
+
+bms = DalyBMS(request_retries=args.retry, address=address, logger=logger)
 bms.connect(device=args.device)
 
 result = False

@@ -35,15 +35,15 @@ pip3 install bleak
 ### Usage
 ```
 # daly-bms-cli --help
-usage: daly-bms-cli.py [-h] -d DEVICE [--status] [--soc] [--mosfet]
-                       [--cell-voltages] [--temperatures] [--balancing]
-                       [--errors] [--all] [--check] [--retry RETRY]
-                       [--verbose]
+usage: daly-bms-cli [-h] -d DEVICE [--uart] [--status] [--soc] [--mosfet]
+                    [--cell-voltages] [--temperatures] [--balancing]
+                    [--errors] [--all] [--check] [--retry RETRY] [--verbose]
 
 optional arguments:
   -h, --help            show this help message and exit
   -d DEVICE, --device DEVICE
                         RS485 device, e.g. /dev/ttyUSB0
+  --uart                UART instead of RS485
   --status              show status
   --soc                 show voltage, current, SOC
   --mosfet              show mosfet status

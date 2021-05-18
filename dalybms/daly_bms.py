@@ -11,7 +11,7 @@ class DalyBMS:
         """
 
         :param request_retries: How often read requests should get repeated in case that they fail (Default: 3).
-        :param address: Source address for commands sent to the BMS (4 for Serial, 8 for Bluetooth)
+        :param address: Source address for commands sent to the BMS (4 for RS485, 8 for UART/Bluetooth)
         :param logger: Python Logger object for output (Default: None)
         """
         self.status = None
