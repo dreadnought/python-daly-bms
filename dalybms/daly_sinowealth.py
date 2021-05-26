@@ -55,8 +55,8 @@ class DalyBMSSinowealth:
             writeTimeout=0.5
         )
 
-    def _format_message(self, command):
-        message = "0a%s02" % command.zfill(2)
+    def _format_message(self, command, length):
+        message = "0a%s0%s" % (command.zfill(2), length)
         message_bytes = bytearray.fromhex(message)
         self.logger.debug("message: %s, %s" % (message_bytes, message_bytes.hex()))
         return message_bytes
@@ -64,7 +64,11 @@ class DalyBMSSinowealth:
     def _read(self, command):
         if not self.serial.isOpen():
             self.serial.open()
-        message_bytes = self._format_message(command)
+        if command in ("10", "11", "12"):
+            length = 4
+        else:
+            length = 2
+        message_bytes = self._format_message(command, length)
 
         # clear all buffers, in case something is left from a previous command that failed
         self.serial.reset_input_buffer()
@@ -74,17 +78,15 @@ class DalyBMSSinowealth:
             self.logger.error("serial write failed for command" % command)
             return False
 
-        if command in ("10", "11", "12"):
-            length = 5
-            ctype = "I"
-        else:
-            length = 3
-            ctype = "H"
-
-        response_data = self.serial.read(length)
+        response_data = self.serial.read(length+1)
         if len(response_data) == 0:
             self.logger.debug("empty response for command %s" % (command))
             return False
+
+        if len(response_data) == 5:
+            ctype = "I"
+        else:
+            ctype = "H"
 
         self.logger.debug("%s %i" % (response_data.hex(), len(response_data)))
         return struct.unpack('>%s x' % ctype, response_data)[0]
@@ -109,28 +111,27 @@ class DalyBMSSinowealth:
     def _read_bulk(self, requests):
         data = {}
         for key, command in requests.items():
-            response_data = self._read(command)
+            response_data = self._read(command[0])
             if not response_data:
                 continue
-            data[key] = response_data / 1000
+            data[key] = response_data / command[1]
 
         return data
 
     def get_soc(self):
         requests = {
-            "total_voltage": "b",
-            "current": "10",
-            "soc_percent": "13"
+            "total_voltage": ("b", 1000),
+            "current": ("10", 1000),
+            "soc_percent": ("13", 1)
         }
         return self._read_bulk(requests)
 
-
     def get_temperatures(self):
         requests = {
-            "external1": "c",
-            "external2": "d",
-            "ic1": "e",
-            "ic2": "f",
+            "external1": ("c", 100),
+            "external2": ("d", 100),
+            "ic1": ("e", 100),
+            "ic2": ("f", 100),
         }
         return self._read_bulk(requests)
 
