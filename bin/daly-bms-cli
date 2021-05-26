@@ -5,13 +5,14 @@ import logging
 import sys
 
 from dalybms import DalyBMS
-
+from dalybms import DalyBMSSinowealth
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--device",
                     help="RS485 device, e.g. /dev/ttyUSB0",
                     type=str, required=True)
 parser.add_argument("--uart", help="UART instead of RS485", action="store_true")
+parser.add_argument("--sinowealth", help="BMS with Sinowealth chip", action="store_true")
 parser.add_argument("--status", help="show status", action="store_true")
 parser.add_argument("--soc", help="show voltage, current, SOC", action="store_true")
 parser.add_argument("--mosfet", help="show mosfet status", action="store_true")
@@ -41,13 +42,18 @@ if args.uart:
 else:
     address = 4
 
-bms = DalyBMS(request_retries=args.retry, address=address, logger=logger)
+if args.sinowealth:
+    bms = DalyBMSSinowealth(request_retries=args.retry, logger=logger)
+else:
+    bms = DalyBMS(request_retries=args.retry, address=address, logger=logger)
 bms.connect(device=args.device)
 
 result = False
 
+
 def print_result(result):
     print(json.dumps(result, indent=2))
+
 
 if args.status:
     result = bms.get_status()
