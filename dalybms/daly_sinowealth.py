@@ -60,7 +60,7 @@ class DalyBMSSinowealth:
         return struct.unpack('>H x', response_data)[0]
 
     def get_cell_voltages(self):
-        max_cells = 16
+        max_cells = 11
         x = 1
         cell_voltages = {}
         while x < max_cells:
@@ -78,7 +78,7 @@ class DalyBMSSinowealth:
         return cell_voltages
 
     def get_soc(self):
-        response_data = self._read("d")
+        response_data = self._read("b")
         if not response_data:
             return False
         return {
