@@ -5,7 +5,7 @@ import logging
 """
 List from BMStool PC / Sinowealth
 1 = Cell 1 Voltage
-....
+...
 09 = Cell 9 Voltage
 0A = Cell 10 Voltage
 0B = Total Voltage
@@ -78,15 +78,15 @@ class DalyBMSSinowealth:
             self.logger.error("serial write failed for command" % command)
             return False
 
-        response_data = self.serial.read(length+1)
+        response_data = self.serial.read(length + 1)
         if len(response_data) == 0:
             self.logger.debug("empty response for command %s" % (command))
             return False
 
         if len(response_data) == 5:
-            ctype = "I"
+            ctype = "i"
         else:
-            ctype = "H"
+            ctype = "h"
 
         self.logger.debug("%s %i" % (response_data.hex(), len(response_data)))
         return struct.unpack('>%s x' % ctype, response_data)[0]
@@ -133,6 +133,8 @@ class DalyBMSSinowealth:
             "ic1": ("e", 100),
             "ic2": ("f", 100),
         }
+        for key, value in requests:
+            requests[key] = value - 10
         return self._read_bulk(requests)
 
     def get_status(self):
