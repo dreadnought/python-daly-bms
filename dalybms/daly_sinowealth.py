@@ -133,9 +133,10 @@ class DalyBMSSinowealth:
             "ic1": ("e", 100),
             "ic2": ("f", 100),
         }
-        for key, value in requests:
+        responses = self._read_bulk(requests)
+        for key, value in responses.items():
             requests[key] = value - 10
-        return self._read_bulk(requests)
+        return responses
 
     def get_status(self):
         return {}
