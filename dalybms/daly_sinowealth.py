@@ -138,5 +138,21 @@ class DalyBMSSinowealth:
             requests[key] = value - 10
         return responses
 
+    # dummy functions for everything that is not supported by the Sinowealth BMS
     def get_status(self):
+        return {}
+
+    def get_cell_voltage_range(self):
+        return {}
+
+    def get_temperature_range(self):
+        return {}
+
+    def get_mosfet_status(self):
+        return {}
+
+    def get_balancing_status(self):
+        return {}
+
+    def get_errors(self):
         return {}
