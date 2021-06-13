@@ -88,7 +88,7 @@ class DalyBMSSinowealth:
         else:
             ctype = "h"
 
-        self.logger.debug("%s %i" % (response_data.hex(), len(response_data)))
+        self.logger.debug("%s (%i)" % (response_data.hex(), len(response_data)))
         return struct.unpack('>%s x' % ctype, response_data)[0]
 
     def get_cell_voltages(self):
@@ -112,7 +112,7 @@ class DalyBMSSinowealth:
         data = {}
         for key, command in requests.items():
             response_data = self._read(command[0])
-            if not response_data:
+            if response_data is False:
                 continue
             data[key] = response_data / command[1]
 
