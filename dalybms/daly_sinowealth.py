@@ -135,7 +135,7 @@ class DalyBMSSinowealth:
         }
         responses = self._read_bulk(requests)
         for key, value in responses.items():
-            requests[key] = value - 10
+            responses[key] = value - 10
         return responses
 
     # dummy functions for everything that is not supported by the Sinowealth BMS
