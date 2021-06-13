@@ -95,7 +95,7 @@ class DalyBMSSinowealth:
         max_cells = 10
         x = 1
         cell_voltages = {}
-        while x < max_cells:
+        while x <= max_cells:
             response_data = self._read("%02x" % x)
             if not response_data:
                 break
