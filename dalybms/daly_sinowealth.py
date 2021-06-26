@@ -127,15 +127,19 @@ class DalyBMSSinowealth:
         return self._read_bulk(requests)
 
     def get_temperatures(self):
+        # The BMS returns temperatures in Kelvin
+        # 2731 / 10 = 273,1 K = 0°C
         requests = {
-            "external1": ("c", 100),
-            "external2": ("d", 100),
-            "ic1": ("e", 100),
-            "ic2": ("f", 100),
+            "external1": ("c", 10),
+            "external2": ("d", 10),
+            # "ic1": ("e", 10),
+            # "ic2": ("f", 100), # always 71
         }
         responses = self._read_bulk(requests)
+
         for key, value in responses.items():
-            responses[key] = value - 10
+            # change temperatures from Kelvin to °C
+            responses[key] = value - 273
         return responses
 
     # dummy functions for everything that is not supported by the Sinowealth BMS
