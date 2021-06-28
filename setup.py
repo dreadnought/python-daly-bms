@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import pathlib
 from setuptools import setup
 
@@ -6,7 +7,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="dalybms",
-    version="0.1.0",
+    version="0.2.0",
     description="Client for Daly BMS",
     long_description=README,
     long_description_content_type="text/markdown",
