@@ -1,5 +1,17 @@
 This is a Python module for reading data from Daly BMS devices. It supports serial as well as Bluetooth connections. Not all commands that the BMS supports are implemented yet, please take a look at the examples below to see if it serves your needs.
 
+## Compatibility
+
+There are two different types of devices sold under the Daly Brand, which use different communication protocols. 
+This module was initially written for BMS supported by the Windows program BMS monitor.
+Later (in #1) the support for BMS supported by the BMStool, also known as Sinowealth, was added. They don't support all commands of the first protocol, but still provide valuable information.
+
+There are two ways to check if your BMS is supported:
+1. First run `daly-bms-cli` normally and see if `--soc` returns data. If not, run it again while adding `--sinowealth`, which switches to the other protocol.
+2. Connect the BMS to a Windows computer, run the PC tools provided by Daly ([Download](https://www.dalyelec.cn/newsshow.php?cid=25&id=77&lang=1)) and see which one works.
+
+If you make it work with the Windows software, but not with `daly-bms-cli`, feel free to create a [bug report](https://github.com/dreadnought/python-daly-bms/issues).
+
 ## Installation
 
 ### From PyPI
@@ -35,15 +47,17 @@ pip3 install bleak
 ### Usage
 ```
 # daly-bms-cli --help
-usage: daly-bms-cli [-h] -d DEVICE [--uart] [--status] [--soc] [--mosfet]
-                    [--cell-voltages] [--temperatures] [--balancing]
-                    [--errors] [--all] [--check] [--retry RETRY] [--verbose]
+usage: daly-bms-cli [-h] -d DEVICE [--uart] [--sinowealth] [--status] [--soc]
+                    [--mosfet] [--cell-voltages] [--temperatures]
+                    [--balancing] [--errors] [--all] [--check] [--retry RETRY]
+                    [--verbose]
 
 optional arguments:
   -h, --help            show this help message and exit
   -d DEVICE, --device DEVICE
                         RS485 device, e.g. /dev/ttyUSB0
   --uart                UART instead of RS485
+  --sinowealth          BMS with Sinowealth chip
   --status              show status
   --soc                 show voltage, current, SOC
   --mosfet              show mosfet status
