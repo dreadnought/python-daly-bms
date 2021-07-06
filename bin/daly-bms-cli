@@ -22,6 +22,7 @@ parser.add_argument("--balancing", help="show cell balancing status", action="st
 parser.add_argument("--errors", help="show BMS errors", action="store_true")
 parser.add_argument("--all", help="show all", action="store_true")
 parser.add_argument("--check", help="Nagios style check", action="store_true")
+parser.add_argument("--set-discharge-mosfet", help="'on' or 'off'", type=str)
 parser.add_argument("--retry", help="retry X times if the request fails, default 5", type=int, default=5)
 parser.add_argument("--verbose", help="Verbose output", action="store_true")
 
@@ -101,6 +102,17 @@ if args.check:
 
     print("%s - %s | %s" % (status_codes[status_code], status_line, " ".join(perfdata)))
     sys.exit(status_code)
+
+if args.set_discharge_mosfet:
+    if args.set_discharge_mosfet == 'on':
+        on = True
+    elif args.set_discharge_mosfet == 'off':
+        on = False
+    else:
+        print("invalid value '%s', expected 'on' or 'off'" % args.set_discharge_mosfet)
+        sys.exit(1)
+
+    result = bms.set_discharge_mosfet(on=on)
 
 if not result:
     sys.exit(1)

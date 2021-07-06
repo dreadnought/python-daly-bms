@@ -50,7 +50,7 @@ class DalyBMS:
         """
         return bytes([sum(message_bytes) & 0xFF])
 
-    def _format_message(self, command):
+    def _format_message(self, command, extra=""):
         """
         Takes the command ID and formats a request message
 
@@ -58,14 +58,14 @@ class DalyBMS:
         :return: Request message as bytes
         """
         # 95 -> a58095080000000000000000c2
-        message = "a5%i0%s08" % (self.address, command)
+        message = "a5%i0%s08%s" % (self.address, command, extra)
         message = message.ljust(24, "0")
         message_bytes = bytearray.fromhex(message)
         message_bytes += self._calc_crc(message_bytes)
         self.logger.debug("w %s" % message_bytes.hex())
         return message_bytes
 
-    def _read_request(self, command, max_responses=1):
+    def _read_request(self, command, extra="", max_responses=1):
         """
         Sends a read request to the BMS and reads the response. In case it fails, it retries 'max_responses' times.
 
@@ -78,6 +78,7 @@ class DalyBMS:
         for x in range(0, self.request_retries):
             response_data = self._read(
                 command=command,
+                extra=extra,
                 max_responses=max_responses)
             if not response_data:
                 self.logger.debug("%x. try failed, retrying..." % (x + 1))
@@ -89,11 +90,11 @@ class DalyBMS:
             return False
         return response_data
 
-    def _read(self, command, max_responses=1):
+    def _read(self, command, extra="", max_responses=1):
         self.logger.debug("-- %s ------------------------" % command)
         if not self.serial.isOpen():
             self.serial.open()
-        message_bytes = self._format_message(command)
+        message_bytes = self._format_message(command, extra=extra)
 
         # clear all buffers, in case something is left from a previous command that failed
         self.serial.reset_input_buffer()
@@ -343,3 +344,18 @@ class DalyBMS:
             "balancing_status": self.get_balancing_status(),
             "errors": self.get_errors()
         }
+
+    def set_discharge_mosfet(self, on=True, response_data=None):
+        if on:
+            extra = "01"
+        else:
+            extra = "00"
+        if not response_data:
+            response_data = self._read_request("d9", extra=extra)
+        if not response_data:
+            return False
+        self.logger.info(response_data.hex())
+        # on response
+        # 0101000002006cbe
+        # off response
+        # 0001000002006c44
