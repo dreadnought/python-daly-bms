@@ -65,7 +65,7 @@ class DalyBMS:
         self.logger.debug("w %s" % message_bytes.hex())
         return message_bytes
 
-    def _read_request(self, command, extra="", max_responses=1):
+    def _read_request(self, command, extra="", max_responses=1, return_list=False):
         """
         Sends a read request to the BMS and reads the response. In case it fails, it retries 'max_responses' times.
 
@@ -79,7 +79,8 @@ class DalyBMS:
             response_data = self._read(
                 command=command,
                 extra=extra,
-                max_responses=max_responses)
+                max_responses=max_responses,
+                return_list=return_list)
             if not response_data:
                 self.logger.debug("%x. try failed, retrying..." % (x + 1))
                 time.sleep(0.2)
@@ -90,7 +91,7 @@ class DalyBMS:
             return False
         return response_data
 
-    def _read(self, command, extra="", max_responses=1):
+    def _read(self, command, extra="", max_responses=1, return_list=False):
         self.logger.debug("-- %s ------------------------" % command)
         if not self.serial.isOpen():
             self.serial.open()
@@ -125,13 +126,12 @@ class DalyBMS:
             if x == max_responses:
                 break
 
-        if (max_responses) == 1:
-            if len(response_data) == 1:
-                return response_data[0]
-            else:
-                return False
-
-        return response_data
+        if return_list or len(response_data) > 1:
+            return response_data
+        elif len(response_data) == 1:
+            return response_data[0]
+        else:
+            return False
 
     def get_soc(self, response_data=None):
         # SOC of Total Voltage Current
@@ -236,18 +236,25 @@ class DalyBMS:
         self.status = data
         return data
 
-    def _calc_cell_voltage_responses(self):
+
+    def _calc_num_responses(self, status_field, num_per_frame):
         if not self.status:
             self.logger.error("get_status has to be called at least once before calling get_cell_voltages")
             return False
 
         # each response message includes 3 cell voltages
         if self.address == 8:
-            # via Bluetooth the BMS returns 16 frames, even when they don't have data
-            max_responses = 16
+            # via Bluetooth the BMS returns all frames, even when they don't have data
+            if status_field == 'cell_voltages':
+                max_responses = 16
+            elif status_field == 'temperatures':
+                max_responses = 3
+            else:
+                self.logger.error("unkonwn status_field %s" % status_field)
+                return False
         else:
             # via UART/USB the BMS returns only frames that have data
-            max_responses = math.ceil(self.status["cells"] / 3)
+            max_responses = math.ceil(self.status[status_field] / num_per_frame)
         return max_responses
 
     def _split_frames(self, response_data, status_field, structure):
@@ -266,10 +273,10 @@ class DalyBMS:
 
     def get_cell_voltages(self, response_data=None):
         if not response_data:
-            max_responses = self._calc_cell_voltage_responses()
+            max_responses = self._calc_num_responses(status_field="cells", num_per_frame=3)
             if not max_responses:
                 return
-            response_data = self._read_request("95", max_responses=max_responses)
+            response_data = self._read_request("95", max_responses=max_responses, return_list=True)
         if not response_data:
             return False
 
@@ -281,7 +288,10 @@ class DalyBMS:
     def get_temperatures(self, response_data=None):
         # Sensor temperatures
         if not response_data:
-            response_data = self._read_request("96", max_responses=3)
+            max_responses = self._calc_num_responses(status_field="temperature_sensors", num_per_frame=7)
+            if not max_responses:
+                return
+            response_data = self._read_request("96", max_responses=max_responses, return_list=True)
         if not response_data:
             return False
 
