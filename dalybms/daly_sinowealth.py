@@ -142,10 +142,13 @@ class DalyBMSSinowealth:
             responses[key] = value - 273
         return responses
 
-    # dummy functions for everything that is not supported by the Sinowealth BMS
     def get_status(self):
-        return {}
+        requests = {
+            "cycles": ("14", 1),
+        }
+        return self._read_bulk(requests)
 
+    # dummy functions for everything that is not supported by the Sinowealth BMS
     def get_cell_voltage_range(self):
         return {}
 
