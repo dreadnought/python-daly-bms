@@ -163,3 +163,16 @@ class DalyBMSSinowealth:
 
     def get_errors(self):
         return {}
+
+    def get_all(self):
+        return {
+            "soc": self.get_soc(),
+            #"cell_voltage_range": self.get_cell_voltage_range(),
+            #"temperature_range": self.get_temperature_range(),
+            #"mosfet_status": self.get_mosfet_status(),
+            "status": self.get_status(),
+            "cell_voltages": self.get_cell_voltages(),
+            "temperatures": self.get_temperatures(),
+            #"balancing_status": self.get_balancing_status(),
+            #"errors": self.get_errors()
+        }
