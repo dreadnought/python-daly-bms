@@ -84,13 +84,13 @@ def mqtt_on_publish(client, userdata, result):
     pass
 
 if args.mqtt:
-    mqtt_client = paho.Client("daly-bms")    
+    mqtt_client = paho.Client("daly-bms", protocol=MQTTv311)    
     mqtt_client.on_publish = mqtt_on_publish
     mqtt_client.connect(args.mqtt_broker, args.mqtt_port)
 
 def print_result(result):
     if args.mqtt:
-        mqtt_client.publish(args.mqtt_topic, json.dumps(result, indent=2), qos=0, retain=True)
+        ret = mqtt_client.publish(args.mqtt_topic, json.dumps(result, indent=2), qos=0, retain=True)
 
     print(json.dumps(result, indent=2))
 
