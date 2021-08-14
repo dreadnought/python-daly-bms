@@ -84,7 +84,7 @@ def mqtt_on_publish(client, userdata, result):
     pass
 
 if args.mqtt:
-    mqtt_client = paho.Client("daly-bms", protocol=MQTTv311)    
+    mqtt_client = paho.Client("daly-bms", protocol=paho.MQTTv311)    
     mqtt_client.on_publish = mqtt_on_publish
     mqtt_client.connect(args.mqtt_broker, args.mqtt_port)
 
