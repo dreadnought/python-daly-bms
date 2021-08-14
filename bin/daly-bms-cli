@@ -90,7 +90,7 @@ if args.mqtt:
 
 def print_result(result):
     if args.mqtt:
-        mqtt_client.publish(args.mqtt_topic, json.dumps(result, indent=2))
+        mqtt_client.publish(args.mqtt_topic, json.dumps(result, indent=2), qos=0, retain=True)
 
     print(json.dumps(result, indent=2))
 
