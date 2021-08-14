@@ -89,10 +89,9 @@ def mqtt_on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
 
 if args.mqtt:
-    mqtt_client = paho.Client("daly-bms", protocol=paho.MQTTv31)    
-    mqtt_client.on_connect = mqtt_on_connect
-    mqtt_client.on_publish = mqtt_on_publish
-    mqtt_client.on_message = mqtt_on_message
+    mqtt_client = paho.Client()    
+    mqtt_client.enable_logger(logger)
+    mqtt_client.username_pw_set(args.mqtt_user, args.mqtt_password)
     mqtt_client.connect(args.mqtt_broker, port=args.mqtt_port)
 
 def print_result(result):
