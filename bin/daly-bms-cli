@@ -77,16 +77,23 @@ else:
 bms.connect(device=args.device)
 
 result = False
+def mqtt_on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
 
 def mqtt_on_publish(client, userdata, result):
     print("data published \n")
     print(json.dumps(result, indent=2))
     pass
 
+def mqtt_on_message(client, userdata, msg):
+    print(msg.topic+" "+str(msg.payload))
+
 if args.mqtt:
     mqtt_client = paho.Client("daly-bms", protocol=paho.MQTTv31)    
+    mqtt_client.on_connect = mqtt_on_connect
     mqtt_client.on_publish = mqtt_on_publish
-    mqtt_client.connect(args.mqtt_broker, args.mqtt_port)
+    mqtt_client.on_message = mqtt_on_message
+    mqtt_client.connect(args.mqtt_broker, port=args.mqtt_port)
 
 def print_result(result):
     if args.mqtt:
