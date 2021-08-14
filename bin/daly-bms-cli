@@ -87,7 +87,7 @@ if args.mqtt:
 def print_result(result):
     if args.mqtt:
         for key in result.keys():
-            mqtt_client.publish(args.mqtt_topic + "/" + key, result[key])
+            mqtt_client.publish("/".join((args.mqtt_topic, str(key))), result[key])
 
     print(json.dumps(result, indent=2))
 
