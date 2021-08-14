@@ -3,6 +3,7 @@ import argparse
 import json
 import logging
 import sys
+import paho.mqtt.client as paho
 
 from dalybms import DalyBMS
 from dalybms import DalyBMSSinowealth
@@ -25,6 +26,31 @@ parser.add_argument("--check", help="Nagios style check", action="store_true")
 parser.add_argument("--set-discharge-mosfet", help="'on' or 'off'", type=str)
 parser.add_argument("--retry", help="retry X times if the request fails, default 5", type=int, default=5)
 parser.add_argument("--verbose", help="Verbose output", action="store_true")
+
+parser.add_argument("--mqtt", help="Write output to MQTT", action="store_true")
+
+parser.add_argument("--mqtt-topic", 
+                    help="MQTT topic to write to", 
+                    type=str)
+
+
+parser.add_argument("--mqtt-broker", 
+                    help="MQTT broker (server). default localhost", 
+                    type=str,
+                    default="localhost")
+
+parser.add_argument("--mqtt-port", 
+                    help="MQTT port. default 1883", 
+                    type=int,
+                    default=1883)
+
+parser.add_argument("--mqtt-user", 
+                    help="Username to authenticate MQTT with", 
+                    type=str)
+
+parser.add_argument("--mqtt-password", 
+                    help="Password to authenticate MQTT with", 
+                    type=str)
 
 args = parser.parse_args()
 
@@ -51,10 +77,15 @@ bms.connect(device=args.device)
 
 result = False
 
+if args.mqtt:
+    mqtt_client = paho.Client("daly-bms")    
+    mqtt_client.connect(args.mqtt_broker, args.mqtt_port)
 
 def print_result(result):
-    print(json.dumps(result, indent=2))
+    if args.mqtt:
+        mqtt_client.publish(args.mqtt_topic, json.dumps(result, indent=2))
 
+    print(json.dumps(result, indent=2))
 
 if args.status:
     result = bms.get_status()
