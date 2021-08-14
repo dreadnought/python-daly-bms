@@ -28,6 +28,7 @@ parser.add_argument("--retry", help="retry X times if the request fails, default
 parser.add_argument("--verbose", help="Verbose output", action="store_true")
 
 parser.add_argument("--mqtt", help="Write output to MQTT", action="store_true")
+parser.add_argument("--mqtt-hass", help="MQTT Home Assistant Mode", action="store_true")
 
 parser.add_argument("--mqtt-topic", 
                     help="MQTT topic to write to. default daly_bms", 
@@ -87,7 +88,11 @@ if args.mqtt:
 def print_result(result):
     if args.mqtt:
         for key in result.keys():
-            mqtt_client.publish("/".join((args.mqtt_topic, str(key))), result[key])
+            seq = (args.mqtt_topic, str(key))
+            if args.mqtt_hass:
+                seq = ("homeassistant", "sensor", args.mqtt_topic + "_" + str(key), "state")
+
+            mqtt_client.publish("/".join(seq), result[key])
 
     print(json.dumps(result, indent=2))
 
