@@ -30,8 +30,9 @@ parser.add_argument("--verbose", help="Verbose output", action="store_true")
 parser.add_argument("--mqtt", help="Write output to MQTT", action="store_true")
 
 parser.add_argument("--mqtt-topic", 
-                    help="MQTT topic to write to", 
-                    type=str)
+                    help="MQTT topic to write to. default daly_bms", 
+                    type=str,
+                    default="daly_bms")
 
 
 parser.add_argument("--mqtt-broker", 
@@ -144,6 +145,9 @@ if args.set_discharge_mosfet:
         sys.exit(1)
 
     result = bms.set_discharge_mosfet(on=on)
+
+if args.mqtt:
+    mqtt_client.disconnect()
 
 if not result:
     sys.exit(1)
