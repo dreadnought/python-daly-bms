@@ -167,7 +167,7 @@ class DalyBMSSinowealth:
 
         for key, value in responses.items():
             # change temperatures from Kelvin to °C
-            responses[key] = f'{(value-273):.2f}'
+            responses[key] = round(value-273, 2)
         return responses
 
     def get_status(self):
@@ -190,7 +190,7 @@ class DalyBMSSinowealth:
 
         for key, value in responses.items():
             if type(responses[key]) is float:
-                responses[key] = f'{value:.2f}'
+                responses[key] = round(value, 2)
 
         pack_response = self._read("15")
         pack_state = []
@@ -204,7 +204,7 @@ class DalyBMSSinowealth:
     def get_errors(self):
         response = self._read("16")
         pack_state = []
-        for key, value in self.PACK_STATUS.items():
+        for key, value in self.BATTERY_STATUS.items():
             if response[key] == "1":
                 pack_state.append(value)
 
