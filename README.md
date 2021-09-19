@@ -47,10 +47,8 @@ pip3 install bleak
 ### Usage
 ```
 # daly-bms-cli --help
-usage: daly-bms-cli [-h] -d DEVICE [--uart] [--sinowealth] [--status] [--soc]
-                    [--mosfet] [--cell-voltages] [--temperatures]
-                    [--balancing] [--errors] [--all] [--check] [--retry RETRY]
-                    [--verbose]
+usage: daly-bms-cli [-h] -d DEVICE [--uart] [--sinowealth] [--status] [--soc] [--mosfet] [--cell-voltages] [--temperatures] [--balancing] [--errors] [--all] [--check] [--set-discharge-mosfet SET_DISCHARGE_MOSFET] [--retry RETRY] [--verbose] [--mqtt]
+                    [--mqtt-hass] [--mqtt-topic MQTT_TOPIC] [--mqtt-broker MQTT_BROKER] [--mqtt-port MQTT_PORT] [--mqtt-user MQTT_USER] [--mqtt-password MQTT_PASSWORD]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -67,8 +65,22 @@ optional arguments:
   --errors              show BMS errors
   --all                 show all
   --check               Nagios style check
+  --set-discharge-mosfet SET_DISCHARGE_MOSFET
+                        'on' or 'off'
   --retry RETRY         retry X times if the request fails, default 5
   --verbose             Verbose output
+  --mqtt                Write output to MQTT
+  --mqtt-hass           MQTT Home Assistant Mode
+  --mqtt-topic MQTT_TOPIC
+                        MQTT topic to write to. default daly_bms
+  --mqtt-broker MQTT_BROKER
+                        MQTT broker (server). default localhost
+  --mqtt-port MQTT_PORT
+                        MQTT port. default 1883
+  --mqtt-user MQTT_USER
+                        Username to authenticate MQTT with
+  --mqtt-password MQTT_PASSWORD
+                        Password to authenticate MQTT with
 ```
 
 ### Examples:
