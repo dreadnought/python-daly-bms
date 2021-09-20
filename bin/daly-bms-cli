@@ -111,8 +111,8 @@ def build_mqtt_hass_config_discovery(base):
     else:
         pass
 
-    hass_config_data["json_attributes_topic"] = f'{args.mqtt_topic}/{base}'
-    hass_config_data["state_topic"] = f'{args.mqtt_topic}/{base}'
+    hass_config_data["json_attributes_topic"] = f'{args.mqtt_topic}{base}'
+    hass_config_data["state_topic"] = f'{args.mqtt_topic}{base}'
 
     hass_device = {
         "identifiers": ['daly_bms'],
@@ -141,7 +141,12 @@ def mqtt_iterator(result, base=''):
                 topic, output = build_mqtt_hass_config_discovery(f'{base}/{key}')
                 mqtt_single_out(topic, output, retain=True)
 
-            mqtt_single_out(f'{args.mqtt_topic}{base}/{key}', result[key])
+            if type(result[key]) == list:
+                val = json.dumps(result[key])
+            else:
+                val = result[key]
+
+            mqtt_single_out(f'{args.mqtt_topic}{base}/{key}', val)
 
 
 def print_result(result):
