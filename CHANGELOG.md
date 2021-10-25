@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added 
+### Added
+
+-
+
+### Fixed
+
+-
+
+## [0.3.0] - 2021-10-25
+
+### Added
 
 - Added `--set-discharge-mosfet` parameter to turn the mosfet on and off (#3)
 - Added cycle count to `--status` for Sinowealth BMS 
