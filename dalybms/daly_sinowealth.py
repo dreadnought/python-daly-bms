@@ -193,6 +193,9 @@ class DalyBMSSinowealth:
                 responses[key] = round(value, 2)
 
         pack_response = self._read("15")
+        if pack_response is False:
+            return responses
+
         pack_state = []
         for key, value in self.PACK_STATUS.items():
             if pack_response[key] == "1":
