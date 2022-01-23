@@ -83,6 +83,10 @@ class DalyBMSSinowealth:
             writeTimeout=0.5
         )
 
+    def disconnect(self):
+        if self.serial and self.serial.is_open:
+            self.serial.close()
+
     def _format_message(self, command, length):
         message = "0a%s0%s" % (command.zfill(2), length)
         message_bytes = bytearray.fromhex(message)
@@ -90,7 +94,7 @@ class DalyBMSSinowealth:
         return message_bytes
 
     def _read(self, command):
-        if not self.serial.isOpen():
+        if not self.serial.is_open:
             self.serial.open()
         if command in ("10", "11", "12"):
             length = 4
@@ -167,7 +171,7 @@ class DalyBMSSinowealth:
 
         for key, value in responses.items():
             # change temperatures from Kelvin to °C
-            responses[key] = round(value-273, 2)
+            responses[key] = round(value - 273, 2)
         return responses
 
     def get_status(self):
@@ -226,12 +230,12 @@ class DalyBMSSinowealth:
     def get_all(self):
         return {
             "soc": self.get_soc(),
-            #"cell_voltage_range": self.get_cell_voltage_range(),
-            #"temperature_range": self.get_temperature_range(),
+            # "cell_voltage_range": self.get_cell_voltage_range(),
+            # "temperature_range": self.get_temperature_range(),
             "mosfet_status": self.get_mosfet_status(),
             "status": self.get_status(),
             "cell_voltages": self.get_cell_voltages(),
             "temperatures": self.get_temperatures(),
-            #"balancing_status": self.get_balancing_status(),
+            # "balancing_status": self.get_balancing_status(),
             "errors": self.get_errors()
         }

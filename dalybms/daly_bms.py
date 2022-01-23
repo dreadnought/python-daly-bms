@@ -6,6 +6,7 @@ import logging
 
 from .error_codes import ERROR_CODES
 
+
 class DalyBMS:
     def __init__(self, request_retries=3, address=4, logger=None):
         """
@@ -39,6 +40,10 @@ class DalyBMS:
             writeTimeout=0.5
         )
         self.get_status()
+
+    def disconnect(self):
+        if self.serial and self.serial.is_open:
+            self.serial.close()
 
     @staticmethod
     def _calc_crc(message_bytes):
@@ -93,7 +98,7 @@ class DalyBMS:
 
     def _read(self, command, extra="", max_responses=1, return_list=False):
         self.logger.debug("-- %s ------------------------" % command)
-        if not self.serial.isOpen():
+        if not self.serial.is_open:
             self.serial.open()
         message_bytes = self._format_message(command, extra=extra)
 
@@ -235,7 +240,6 @@ class DalyBMS:
         }
         self.status = data
         return data
-
 
     def _calc_num_responses(self, status_field, num_per_frame):
         if not self.status:

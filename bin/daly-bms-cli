@@ -29,28 +29,27 @@ parser.add_argument("--verbose", help="Verbose output", action="store_true")
 parser.add_argument("--mqtt", help="Write output to MQTT", action="store_true")
 parser.add_argument("--mqtt-hass", help="MQTT Home Assistant Mode", action="store_true")
 
-parser.add_argument("--mqtt-topic", 
-                    help="MQTT topic to write to. default daly_bms", 
+parser.add_argument("--mqtt-topic",
+                    help="MQTT topic to write to. default daly_bms",
                     type=str,
                     default="daly_bms")
 
-
-parser.add_argument("--mqtt-broker", 
-                    help="MQTT broker (server). default localhost", 
+parser.add_argument("--mqtt-broker",
+                    help="MQTT broker (server). default localhost",
                     type=str,
                     default="localhost")
 
-parser.add_argument("--mqtt-port", 
-                    help="MQTT port. default 1883", 
+parser.add_argument("--mqtt-port",
+                    help="MQTT port. default 1883",
                     type=int,
                     default=1883)
 
-parser.add_argument("--mqtt-user", 
-                    help="Username to authenticate MQTT with", 
+parser.add_argument("--mqtt-user",
+                    help="Username to authenticate MQTT with",
                     type=str)
 
-parser.add_argument("--mqtt-password", 
-                    help="Password to authenticate MQTT with", 
+parser.add_argument("--mqtt-password",
+                    help="Password to authenticate MQTT with",
                     type=str)
 
 args = parser.parse_args()
@@ -78,9 +77,11 @@ bms.connect(device=args.device)
 
 result = False
 
+mqtt_client = None
 if args.mqtt:
     import paho.mqtt.client as paho
-    mqtt_client = paho.Client()    
+
+    mqtt_client = paho.Client()
     mqtt_client.enable_logger(logger)
     mqtt_client.username_pw_set(args.mqtt_user, args.mqtt_password)
     mqtt_client.connect(args.mqtt_broker, port=args.mqtt_port)
@@ -214,8 +215,10 @@ if args.set_discharge_mosfet:
 
     result = bms.set_discharge_mosfet(on=on)
 
-if args.mqtt:
+if mqtt_client:
     mqtt_client.disconnect()
+
+bms.disconnect()
 
 if not result:
     sys.exit(1)
