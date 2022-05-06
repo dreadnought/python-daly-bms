@@ -93,7 +93,7 @@ class DalyBMSBluetooth(DalyBMS):
 
         num_frames = int(len(data) / 13)
         if num_frames == 0:
-            self.logger.error(f"{len(data)} bytes received, not enough for a data frame, not implemented")
+            self.logger.debug(f"{len(data)} bytes received, not enough for a data frame, discarding")
 
         for frame_start in range(0, num_frames*13, 13):
             # check that the data frame is properly formatted:

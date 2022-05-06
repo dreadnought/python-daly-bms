@@ -6,6 +6,7 @@ from dalybms import DalyBMSBluetooth
 
 class TestBluetoothCommands:
     notification_handler = None
+    scenario_id = None
 
     async def write_gatt_char_mock(self, char, data):
         assert (self.notification_handler is not None)
@@ -26,8 +27,15 @@ class TestBluetoothCommands:
 
         # Mosfet status command
         if data == b'\xa5\x80\x93\x08\x00\x00\x00\x00\x00\x00\x00\x00\xc0':
-            # {'mode': 'discharging', 'charging_mosfet': True, 'discharging_mosfet': True, 'capacity_ah': 256.76}
-            self.notification_handler('93', b'\xa5\x01\x93\x08\x02\x01\x01\x9e\x00\x03\xea\xf8\xc8')
+            if self.scenario_id == 1:
+                # {'mode': 'discharging', 'charging_mosfet': True, 'discharging_mosfet': True, 'capacity_ah': 256.76}
+                self.notification_handler('93', b'\xa5\x01\x93\x08\x02\x01\x01\x9e\x00\x03\xea\xf8\xc8')
+
+            if self.scenario_id == 2:
+                # {'mode': 'charging', 'charging_mosfet': False, 'discharging_mosfet': True, 'capacity_ah': 280.0}
+                self.notification_handler('93', b'\xa5\x01\x93\x08\x01\x00\x015\x00\x04E\xc0\x81')
+
+            self.scenario_id = None
 
         # Status command
         if data == b'\xa5\x80\x94\x08\x00\x00\x00\x00\x00\x00\x00\x00\xc1':
@@ -48,16 +56,25 @@ class TestBluetoothCommands:
 
         # Temperatures command
         if data == b'\xa5\x80\x96\x08\x00\x00\x00\x00\x00\x00\x00\x00\xc3':
-            self.notification_handler('96', b'\xa5\x01\x96\x08\x01=\x00\x00\x00\x00\x00\x00\x82\xa5\x01\x96\x08\x02\x00\x00\x00\x00\x00\x00\x00F')
+            self.notification_handler('96',
+                                      b'\xa5\x01\x96\x08\x01=\x00\x00\x00\x00\x00\x00\x82\xa5\x01\x96\x08\x02\x00\x00\x00\x00\x00\x00\x00F')
 
         # Balancing status command
         if data == b'\xa5\x80\x97\x08\x00\x00\x00\x00\x00\x00\x00\x00\xc4':
-            self.notification_handler('97', b'\xa5\x01\x97\x08\x00\x00\x00\x00\x00\x00\x00\x00E')
+            if self.scenario_id == 1:
+                self.notification_handler('97', b'\xa5\x01\x97\x08\x01\x01\x00\x00\x00\x00\x00\x00G')
+
+            if self.scenario_id == 2:
+                self.notification_handler('97', b'\xa5\x01\x97\x08\x00\x00\x00\x00\x00\x00\x00\x00E')
 
         # get errors command
         if data == b'\xa5\x80\x98\x08\x00\x00\x00\x00\x00\x00\x00\x00\xc5':
-            # []
-            self.notification_handler('98', b'\xa5\x01\x98\x08\x00\x00\x00\x00\x00\x00\x00\x00F')
+            if self.scenario_id == 1:
+                # []
+                self.notification_handler('98', b'\xa5\x01\x98\x08\x00\x00\x00\x00\x00\x00\x00\x00F')
+            if self.scenario_id == 2:
+                # ['cell voltage is too high level 2 alarm']
+                self.notification_handler('98', b'\xa5\x01\x98\x08\x02\x00\x00\x00\x00\x00\x00\x00H')
 
     async def start_notify_mock(self, char_uuid, notification_handler):
         self.notification_handler = notification_handler
@@ -115,20 +132,20 @@ class TestBluetoothCommands:
             assert (response['lowest_sensor'] == 1)
 
     @pytest.mark.asyncio
-    async def test_get_mosfet_status(self):
+    @pytest.mark.parametrize('scenario_id, expected', [
+        (1, {'mode': 'discharging', 'charging_mosfet': True, 'discharging_mosfet': True, 'capacity_ah': 256.76}),
+        (2, {'mode': 'charging', 'charging_mosfet': False, 'discharging_mosfet': True, 'capacity_ah': 280.0})])
+    async def test_get_mosfet_status(self, scenario_id, expected):
         with patch('dalybms.daly_bms_bluetooth.BleakClient') as bleak_mock:
             self.setup_bleak_mock(bleak_mock)
-
+            self.scenario_id = scenario_id
             daly = DalyBMSBluetooth()
             await daly.connect('99:99:99:99:99:99')
 
             response = await daly.get_mosfet_status()
 
-            # {'mode': 'discharging', 'charging_mosfet': True, 'discharging_mosfet': True, 'capacity_ah': 256.76}
-            assert (response['mode'] == 'discharging')
-            assert (response['charging_mosfet'] is True)
-            assert (response['discharging_mosfet'] is True)
-            assert (response['capacity_ah'] == 256.76)
+            for k, v in expected.items():
+                assert (response[k] == v)
 
     @pytest.mark.asyncio
     async def test_status(self):
@@ -186,11 +203,14 @@ class TestBluetoothCommands:
 
             assert (response[1] == 21)
 
-
     @pytest.mark.asyncio
-    async def test_get_balancing_status(self):
+    @pytest.mark.parametrize('scenario_id, expected', [
+        (1, {1: True, 2: False, 3: False, 4: False, 5: False, 6: False, 7: False, 8: False, 9: True, 10: False, 11: False, 12: False, 13: False, 14: False, 15: False, 16: False}),
+        (2, {1: False, 2: False, 3: False, 4: False, 5: False, 6: False, 7: False, 8: False, 9: False, 10: False, 11: False, 12: False, 13: False, 14: False, 15: False, 16: False})])
+    async def test_get_balancing_status(self, scenario_id, expected):
         with patch('dalybms.daly_bms_bluetooth.BleakClient') as bleak_mock:
             self.setup_bleak_mock(bleak_mock)
+            self.scenario_id = scenario_id
 
             daly = DalyBMSBluetooth()
             await daly.connect('99:99:99:99:99:99')
@@ -198,17 +218,21 @@ class TestBluetoothCommands:
 
             response = await daly.get_balancing_status()
 
-            assert (response['error'] == 'not implemented')
-
+            for k, v in expected.items():
+                assert (response[k] == v)
 
     @pytest.mark.asyncio
-    async def test_get_errors(self):
+    @pytest.mark.parametrize('scenario_id, expected', [
+        (1, []),
+        (2, ['cell voltage is too high level 2 alarm'])])
+    async def test_get_errors(self, scenario_id, expected):
         with patch('dalybms.daly_bms_bluetooth.BleakClient') as bleak_mock:
             self.setup_bleak_mock(bleak_mock)
+            self.scenario_id = scenario_id
 
             daly = DalyBMSBluetooth()
             await daly.connect('99:99:99:99:99:99')
 
             response = await daly.get_errors()
 
-            assert (response == [])
+            assert (response == expected)

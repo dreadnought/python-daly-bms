@@ -317,11 +317,10 @@ class DalyBMS:
         bits = bin(int(response_data.hex(), base=16))[2:].zfill(48)
         self.logger.info(bits)
         cells = {}
-        for cell in range(1, self.status["cells"] + 1):
-            cells[cell] = bool(int(bits[cell * -1]))
-        self.logger.info(cells)
-        # todo: get sample data and verify result
-        return {"error": "not implemented"}
+        for cell in range(0, self.status["cells"]):
+            cells[cell+1] = bool(int(bits[cell]))
+        self.logger.debug(cells)
+        return cells
 
     def get_errors(self, response_data=None):
         # Battery failure status
