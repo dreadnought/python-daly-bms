@@ -5,10 +5,10 @@ so the translation quality isn't that great yet.
 
 ERROR_CODES = {
     0: [
-        "one stage warning of unit over voltage",
-        "one stage warning of unit over voltage",
-        "one stage warning of unit over voltage",
-        "two stage warning of unit over voltage",
+        "cell voltage is too high level 1 alarm",
+        "cell voltage is too high level 2 alarm",
+        "cell voltage is too low level 1 alarm",
+        "cell voltage is too low level 2 alarm",
         "Total voltage is too high One alarm",
         "Total voltage is too high Level two alarm",
         "Total voltage is too low One alarm",
