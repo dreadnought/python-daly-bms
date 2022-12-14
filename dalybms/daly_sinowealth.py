@@ -41,17 +41,17 @@ class DalyBMSSinowealth:
     }
 
     BATTERY_STATUS = {
-        1: 'CTO',
-        2: 'AFE_SC: Short Circuit in AFE (Analog Front End)',
-        3: 'AFE_OV: Over Voltage in AFE (Analog Front End)',
-        4: 'UTD: Under Voltage in Discharge',
-        5: 'UTC: Under Voltage in Charge',
-        6: 'OTD: Over Voltage in Discharge',
-        7: 'OTC: Over Voltage in Charge',
-        12: 'OCD: Overcurrent Discharge',
-        13: 'OCC: Overcurrent Charge',
-        14: 'UV: Undervoltage',
-        15: 'OV: Overvoltage',
+        1: 'CTO: Disconnection protection occurs',
+        2: 'AFE_SC: Hardware short circuit protection occurs',
+        3: 'AFE_OV: Hardware overvoltage protection occurs',
+        4: 'UTD: Discharge low temperature protection',
+        5: 'UTC: Charge low temperature protection occurs',
+        6: 'OTD: Discharge high temperature protection',
+        7: 'OTC: Charge high temperature protection occurs',
+        12: 'OCD: Discharge overcurrent protection occurs',
+        13: 'OCC: Charge overcurrent protection occurs',
+        14: 'UV: Undervoltage protection occurs',
+        15: 'OV: Overvoltage protection occurs',
     }
 
     def __init__(self, request_retries=3, logger=None):
