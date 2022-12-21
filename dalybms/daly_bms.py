@@ -373,3 +373,18 @@ class DalyBMS:
         # 0101000002006cbe
         # off response
         # 0001000002006c44
+
+
+    def set_soc(self, value):
+        v = round(value*10.0)
+        if v > 1000 : v = 1000
+        if v < 0 : v = 0
+        extra='000000000000%0.4X' % v
+        response_data = self._read_request("21", extra=extra)
+        self.logger.info(response_data.hex())
+        # on response
+        # 0101000002006cbe
+        # off response
+        # 0001000002006c44
+
+        
