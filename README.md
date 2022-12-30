@@ -40,6 +40,11 @@ For *bluetooth* connections:
 pip3 install bleak
 ```
 
+For *MQTT*:
+```
+pip3 install paho-mqtt
+```
+
 ## CLI
 
 `daly-bms-cli` is a reference implementation for this module, but can also be used to test the connection or use it in combination with other programming languages. The data gets returned in JSON format. It doesn't support Bluetooth connections yet.
@@ -160,6 +165,11 @@ Get everything possible:
     "SOC is too low. level one alarm"
   ]
 }
+```
+
+Send SOC data to a MQTT broker:
+```
+# daly-bms-cli -d /dev/ttyUSB0 --soc --mqtt --mqtt-broker 192.168.1.123
 ```
 
 ## Notes
