@@ -101,7 +101,7 @@ def build_mqtt_hass_config_discovery(base):
     if 'soc_percent' in base:
         hass_config_data["device_class"] = 'battery'
         hass_config_data["unit_of_measurement"] = '%'
-    elif 'voltage' in base:
+    elif 'voltage' in base and not ('lowest_cell' in base or 'highest_cell' in base):
         hass_config_data["device_class"] = 'voltage'
         hass_config_data["unit_of_measurement"] = 'V'
     elif 'current' in base:
@@ -110,6 +110,9 @@ def build_mqtt_hass_config_discovery(base):
     elif 'temperatures' in base:
         hass_config_data["device_class"] = 'temperature'
         hass_config_data["unit_of_measurement"] = '°C'
+    elif 'capacity' in 'base':
+        hass_config_data["device_class"] = 'energy'
+        hass_config_data["unit_of_measurement"] = 'Ah'
     else:
         pass
 
