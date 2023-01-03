@@ -40,6 +40,11 @@ For *bluetooth* connections:
 pip3 install bleak
 ```
 
+For *MQTT*:
+```
+pip3 install paho-mqtt
+```
+
 ## CLI
 
 `daly-bms-cli` is a reference implementation for this module, but can also be used to test the connection or use it in combination with other programming languages. The data gets returned in JSON format. It doesn't support Bluetooth connections yet.
@@ -47,7 +52,7 @@ pip3 install bleak
 ### Usage
 ```
 # daly-bms-cli --help
-usage: daly-bms-cli [-h] -d DEVICE [--uart] [--sinowealth] [--status] [--soc] [--mosfet] [--cell-voltages] [--temperatures] [--balancing] [--errors] [--all] [--check] [--set-discharge-mosfet SET_DISCHARGE_MOSFET] [--retry RETRY] [--verbose] [--mqtt]
+usage: daly-bms-cli [-h] -d DEVICE [--uart] [--sinowealth] [--status] [--soc] [--mosfet] [--cell-voltages] [--temperatures] [--balancing] [--errors] [--all] [--check] [--set-discharge-mosfet SET_DISCHARGE_MOSFET] [--set-soc] [--retry RETRY] [--verbose] [--mqtt]
                     [--mqtt-hass] [--mqtt-topic MQTT_TOPIC] [--mqtt-broker MQTT_BROKER] [--mqtt-port MQTT_PORT] [--mqtt-user MQTT_USER] [--mqtt-password MQTT_PASSWORD]
 
 optional arguments:
@@ -67,6 +72,7 @@ optional arguments:
   --check               Nagios style check
   --set-discharge-mosfet SET_DISCHARGE_MOSFET
                         'on' or 'off'
+  --set-soc SET_SOC     0.0 to 100.0
   --retry RETRY         retry X times if the request fails, default 5
   --verbose             Verbose output
   --mqtt                Write output to MQTT
@@ -159,6 +165,11 @@ Get everything possible:
     "SOC is too low. level one alarm"
   ]
 }
+```
+
+Send SOC data to a MQTT broker:
+```
+# daly-bms-cli -d /dev/ttyUSB0 --soc --mqtt --mqtt-broker 192.168.1.123
 ```
 
 ## Notes

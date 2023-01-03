@@ -15,6 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.4.0] - 2022-12-30
+
+### Added
+
+- Add `set_soc` command (#35)
+
+### Fixed
+
+- Don't crash if the Pack Status response is empty
+- Call serial.close() before exiting
+- Correct error messages of Sinowealth BMS (resolves #34)
+
 ## [0.3.0] - 2021-10-25
 
 ### Added
