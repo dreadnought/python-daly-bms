@@ -3,3 +3,4 @@ dist/
 dalybms.egg-info/
 dalybms/__pycache__/
 venv/
+.idea/
