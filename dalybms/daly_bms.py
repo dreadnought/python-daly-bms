@@ -358,6 +358,21 @@ class DalyBMS:
             "balancing_status": self.get_balancing_status(),
             "errors": self.get_errors()
         }
+    
+    def set_charge_mosfet(self, on=True, response_data=None):
+        if on:
+            extra = "01"
+        else:
+            extra = "00"
+        if not response_data:
+            response_data = self._read_request("da", extra=extra)
+        if not response_data:
+            return False
+        self.logger.info(response_data.hex())
+        # on response
+        # 0101000002006cbe
+        # off response
+        # 0001000002006c44
 
     def set_discharge_mosfet(self, on=True, response_data=None):
         if on:
@@ -383,4 +398,6 @@ class DalyBMS:
         extra='000000000000%0.4X' % v
         response_data = self._read_request("21", extra=extra)
         self.logger.info(response_data.hex())
-        
+
+    def restart(self, response_data=None):
+        response_data = self._read("00","",1,False)
