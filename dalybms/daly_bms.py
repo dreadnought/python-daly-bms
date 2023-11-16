@@ -401,9 +401,3 @@ class DalyBMS:
 
     def restart(self, response_data=None):
         response_data = self._read("00","",1,False)
-
-
-
-
-
-        
