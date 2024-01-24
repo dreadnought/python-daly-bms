@@ -7,7 +7,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="dalybms",
-    version="0.4.0",
+    version="0.5.0",
     description="Client for Daly BMS",
     long_description=README,
     long_description_content_type="text/markdown",

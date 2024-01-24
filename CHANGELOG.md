@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -
 
+## [0.5.0] - 2024-01-24
+
+### Added
+
+-  Add charge mosfet switch and restart action (#45)
+
+### Fixed
+
+- MQTT adjustments for voltage and capacity (#38)
+
 ## [0.4.0] - 2022-12-30
 
 ### Added
