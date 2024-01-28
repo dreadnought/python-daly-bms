@@ -241,7 +241,7 @@ class DalyBMS:
         self.status = data
         return data
 
-    def _calc_num_responses(self, status_field, num_per_frame):
+    def _calc_num_responses(self, status_field, num_per_frame=3):
         if not self.status:
             self.logger.error("get_status has to be called at least once before calling get_cell_voltages")
             return False
@@ -250,9 +250,11 @@ class DalyBMS:
         if self.address == 8:
             # via Bluetooth the BMS returns all frames, even when they don't have data
             if status_field == 'cell_voltages':
-                max_responses = 16
+                # TODO Not too sure about this. My BMS returns 12 frames of 3 voltages each
+                max_responses = 12
             elif status_field == 'temperatures':
-                max_responses = 3
+                # TODO Not too sure about this. My BMS returns 2 frames of 3 temperatures each
+                max_responses = 2
             else:
                 self.logger.error("unkonwn status_field %s" % status_field)
                 return False
@@ -315,11 +317,10 @@ class DalyBMS:
         bits = bin(int(response_data.hex(), base=16))[2:].zfill(48)
         self.logger.info(bits)
         cells = {}
-        for cell in range(1, self.status["cells"] + 1):
-            cells[cell] = bool(int(bits[cell * -1]))
-        self.logger.info(cells)
-        # todo: get sample data and verify result
-        return {"error": "not implemented"}
+        for cell in range(0, self.status["cells"]):
+            cells[cell+1] = bool(int(bits[cell]))
+        self.logger.debug(cells)
+        return cells
 
     def get_errors(self, response_data=None):
         # Battery failure status
